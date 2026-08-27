@@ -13,28 +13,28 @@ export const AboutView: React.FC<AboutViewProps> = () => {
   const socialLinks = [
     {
       name: 'Facebook',
-      url: 'https://facebook.com',
+      url: 'https://www.facebook.com/phu.phid.hwang.tlxd.pi.kxlf/',
       icon: Share2,
       color: 'bg-blue-600/20 text-blue-400 border-blue-500/30 hover:bg-blue-600/30',
       label: 'Nay Golf',
     },
     {
       name: 'GitHub',
-      url: 'https://github.com',
+      url: 'https://github.com/KCCHDEV',
       icon: Code2,
       color: 'bg-slate-800 text-slate-200 border-slate-700 hover:bg-slate-700',
-      label: 'NayGolf Dev',
+      label: 'KCCHDEV',
     },
     {
       name: 'Discord',
-      url: 'https://discord.gg',
+      url: 'https://discord.gg/4ZFgZxcHGU',
       icon: MessageSquare,
       color: 'bg-indigo-600/20 text-indigo-400 border-indigo-500/30 hover:bg-indigo-600/30',
       label: 'Join Discord Server',
     },
     {
       name: 'Project Repo',
-      url: 'https://github.com/anomalyco/opencode',
+      url: 'https://github.com/KCCHDEV/Ichigo-Music',
       icon: Globe,
       color: 'bg-sky-500/20 text-sky-300 border-sky-500/30 hover:bg-sky-500/30',
       label: 'Ichigo Music Repository',
