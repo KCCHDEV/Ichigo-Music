@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { Sparkles, Loader2 } from 'lucide-react';
-import { PUBLIC_LAVALINK_SERVERS } from '../services/lavalinkPresets';
+import { getStoredLavalinkServers } from '../services/lavalinkPresets';
 import { LavalinkServerPreset } from '../types/music';
 import { customFetch } from '../services/http';
 import { logger } from '../services/logger';
 
 interface SplashScreenProps {
-  onComplete: (bestServer: LavalinkServerPreset) => void;
+  onComplete: (bestServer?: LavalinkServerPreset) => void;
 }
 
 export const SplashScreen: React.FC<SplashScreenProps> = ({ onComplete }) => {
@@ -18,7 +18,19 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onComplete }) => {
   }, []);
 
   const runStartupChecks = async () => {
-    const checkPromises = PUBLIC_LAVALINK_SERVERS.map(async (server) => {
+    const serversToTest = getStoredLavalinkServers();
+
+    if (serversToTest.length === 0) {
+      logger.addLog('info', 'System', 'No Lavalink servers configured in presets. Ready for user input or local MP3 mode.');
+      await new Promise(r => setTimeout(r, 800));
+      setIsFadingOut(true);
+      setTimeout(() => {
+        onComplete();
+      }, 600);
+      return;
+    }
+
+    const checkPromises = serversToTest.map(async (server) => {
       const protocol = server.secure ? 'https' : 'http';
       const url = `${protocol}://${server.host}:${server.port}/v4/loadtracks?identifier=ytsearch:music`;
       const start = Date.now();
@@ -48,7 +60,7 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onComplete }) => {
     const results = await Promise.all(checkPromises);
     const onlineServers = results.filter(r => r.isOnline && r.latency !== null).sort((a, b) => (a.latency || 9999) - (b.latency || 9999));
 
-    let chosen = PUBLIC_LAVALINK_SERVERS[0];
+    let chosen = serversToTest[0];
     if (onlineServers.length > 0) {
       chosen = onlineServers[0].server;
     }

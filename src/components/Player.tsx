@@ -290,7 +290,56 @@ export const Player: React.FC<PlayerProps> = ({
   return (
     <div className="h-24 bg-slate-950/95 border-t border-slate-800/80 px-6 flex items-center justify-between z-40 fixed bottom-0 left-0 right-0 backdrop-blur-xl">
       {/* HTML Audio element & YT Player iframe */}
-      <audio ref={audioRef} onEnded={onTrackEnd} className="hidden" />
+      <audio
+        ref={audioRef}
+        onTimeUpdate={() => {
+          if (audioRef.current && !ytId) {
+            const curr = audioRef.current.currentTime || 0;
+            const dur = audioRef.current.duration || 0;
+            setCurrentTime(curr);
+            if (dur > 0 && !isNaN(dur)) {
+              setDuration(dur);
+            }
+            onTimeUpdate?.(curr);
+          }
+        }}
+        onLoadedMetadata={() => {
+          if (audioRef.current && !ytId) {
+            const dur = audioRef.current.duration || 0;
+            if (dur > 0 && !isNaN(dur)) {
+              setDuration(dur);
+            }
+          }
+        }}
+        onPlay={() => {
+          if (!ytId) setPlaybackStatus('playing');
+        }}
+        onPause={() => {
+          if (!ytId && audioRef.current && !audioRef.current.ended) {
+            setPlaybackStatus('paused');
+          }
+        }}
+        onEnded={() => {
+          if (!ytId) {
+            setPlaybackStatus('idle');
+            if (isRepeat) {
+              if (audioRef.current) {
+                audioRef.current.currentTime = 0;
+                audioRef.current.play().catch(console.error);
+              }
+            } else {
+              onTrackEnd();
+            }
+          }
+        }}
+        onError={() => {
+          if (!ytId) {
+            logger.addLog('error', 'Player', `Failed to play audio file: ${currentTrack?.title}`);
+            setPlaybackStatus('error');
+          }
+        }}
+        className="hidden"
+      />
       <iframe
         ref={iframeRef}
         id="yt-player-iframe-element"

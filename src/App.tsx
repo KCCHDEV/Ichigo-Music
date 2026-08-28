@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
+import { FolderOpen } from 'lucide-react';
 import { Sidebar } from './components/Sidebar';
 import { Header } from './components/Header';
 import { Player } from './components/Player';
@@ -43,6 +44,10 @@ export function App() {
   const [isPlaying, setIsPlaying] = useState(false);
   const [queue, setQueue] = useState<Track[]>([]);
 
+  // File Input & Drag and Drop state
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [isDragOver, setIsDragOver] = useState(false);
+
   // History state
   const [historyItems, setHistoryItems] = useState<HistoryItem[]>([]);
 
@@ -56,16 +61,87 @@ export function App() {
   }, []);
 
   // Handle Splash Screen Completion
-  const handleSplashComplete = (bestServer: LavalinkServerPreset) => {
-    logger.addLog('success', 'System', `Splash sequence complete. Connecting to ${bestServer.name}`);
-    lavalinkService.updateConfig(bestServer);
-    setCurrentConfig(bestServer);
-
-    lavalinkService.testConnection().then((res) => {
-      setIsConnected(res.success);
-    });
-
+  const handleSplashComplete = (bestServer?: LavalinkServerPreset) => {
+    if (bestServer) {
+      logger.addLog('success', 'System', `Splash sequence complete. Connecting to ${bestServer.name}`);
+      lavalinkService.updateConfig(bestServer);
+      setCurrentConfig(bestServer);
+      lavalinkService.testConnection().then((res) => {
+        setIsConnected(res.success);
+      });
+    } else {
+      logger.addLog('info', 'System', 'Splash sequence complete. No preset server chosen.');
+      const existing = lavalinkService.getConfig();
+      setCurrentConfig(existing);
+      if (existing.host) {
+        lavalinkService.testConnection().then((res) => {
+          setIsConnected(res.success);
+        });
+      }
+    }
     setShowSplash(false);
+  };
+
+  // Local MP3 File Import Handlers
+  const handleOpenLocalFiles = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleImportLocalFiles = (files: FileList | File[]) => {
+    const audioFiles = Array.from(files).filter(file =>
+      file.type.startsWith('audio/') ||
+      /\.(mp3|wav|ogg|flac|m4a|aac|opus|webm)$/i.test(file.name)
+    );
+
+    if (audioFiles.length === 0) {
+      logger.addLog('warn', 'System', 'No valid audio files selected.');
+      return;
+    }
+
+    const newTracks: Track[] = audioFiles.map(file => ({
+      identifier: `local-${Date.now()}-${Math.random().toString(36).substr(2, 6)}`,
+      title: file.name.replace(/\.[^/.]+$/, ''),
+      author: 'ไฟล์ในเครื่อง (Local MP3)',
+      length: 0,
+      isSeekable: true,
+      position: 0,
+      uri: URL.createObjectURL(file),
+      isStream: false,
+      sourceName: 'local',
+      artworkUrl: '/app-logo.png',
+    }));
+
+    logger.addLog('info', 'System', `Imported ${newTracks.length} local audio file(s).`);
+
+    const firstTrack = newTracks[0];
+    const remaining = newTracks.slice(1);
+
+    handlePlayTrack(firstTrack);
+
+    if (remaining.length > 0) {
+      setQueue(prev => [...prev, ...remaining]);
+    }
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragOver(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragOver(false);
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragOver(false);
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      handleImportLocalFiles(e.dataTransfer.files);
+    }
   };
 
   // Perform search query
@@ -228,7 +304,36 @@ export function App() {
   const recentlyPlayedTracks = historyItems.map(h => h.track);
 
   return (
-    <div className="flex h-screen bg-slate-950 text-slate-100 overflow-hidden font-sans relative">
+    <div
+      onDragOver={handleDragOver}
+      onDragLeave={handleDragLeave}
+      onDrop={handleDrop}
+      className="flex h-screen bg-slate-950 text-slate-100 overflow-hidden font-sans relative"
+    >
+      {/* Hidden Local File Input */}
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="audio/*,.mp3,.wav,.ogg,.flac,.m4a"
+        multiple
+        className="hidden"
+        onChange={(e) => {
+          if (e.target.files && e.target.files.length > 0) {
+            handleImportLocalFiles(e.target.files);
+            e.target.value = '';
+          }
+        }}
+      />
+
+      {/* Drag & Drop Visual Indicator */}
+      {isDragOver && (
+        <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md border-4 border-dashed border-sky-500 flex flex-col items-center justify-center pointer-events-none animate-fade-in">
+          <FolderOpen className="w-16 h-16 text-sky-400 animate-bounce mb-4" />
+          <h2 className="text-2xl font-bold text-white">วางไฟล์ MP3 ที่นี่</h2>
+          <p className="text-sky-300 text-sm mt-1">ปล่อยไฟล์เพื่อเล่นเพลงทันที และจัดเข้าคิวอัตโนมัติ</p>
+        </div>
+      )}
+
       {/* Overlay Splash Screen on top of main UI for seamless fade out without black screen */}
       {showSplash && <SplashScreen onComplete={handleSplashComplete} />}
 
@@ -238,6 +343,7 @@ export function App() {
         setActiveTab={setActiveTab}
         openSettings={() => setIsSettingsOpen(true)}
         isConnected={isConnected}
+        onOpenLocalFiles={handleOpenLocalFiles}
       />
 
       {/* Main Content Area */}
@@ -245,6 +351,7 @@ export function App() {
         <Header
           onSearchSubmit={handleSearch}
           isConnected={isConnected}
+          onOpenLocalFiles={handleOpenLocalFiles}
         />
 
         <main className="flex-1 overflow-y-auto bg-gradient-to-b from-slate-900/50 via-slate-950 to-slate-950">
@@ -254,6 +361,7 @@ export function App() {
                 onPlayTrack={handlePlayTrack}
                 onSearchQuery={handleSearch}
                 recentlyPlayed={recentlyPlayedTracks}
+                onOpenLocalFiles={handleOpenLocalFiles}
               />
             )}
 

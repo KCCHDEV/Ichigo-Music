@@ -257,7 +257,25 @@ export const ServerStatusView: React.FC<ServerStatusViewProps> = ({
       </div>
 
       {/* Server Preset & Custom Cards Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+      {servers.length === 0 ? (
+        <div className="p-12 text-center rounded-3xl bg-slate-900/60 border border-slate-800 space-y-4 max-w-2xl mx-auto my-8 animate-fade-in">
+          <div className="w-16 h-16 rounded-full bg-sky-500/10 border border-sky-500/20 text-sky-400 flex items-center justify-center mx-auto">
+            <Server className="w-8 h-8" />
+          </div>
+          <h3 className="text-xl font-bold text-white">ยังไม่มี Lavalink Server ในระบบ</h3>
+          <p className="text-slate-400 text-sm leading-relaxed">
+            ระบบเปิดโอกาสให้คุณเชื่อมต่อเซิร์ฟเวอร์ส่วนตัวด้วยตนเอง กรุณากดปุ่ม <strong>"เพิ่ม Server ใหม่"</strong> เพื่อใส่ Host, Port และ Password ของเซิร์ฟเวอร์ที่คุณเลือกใช้ หรือเปิดฟังเพลงจากไฟล์ MP3 ในเครื่องได้ทันที
+          </p>
+          <button
+            onClick={() => setIsAddModalOpen(true)}
+            className="px-6 py-3 rounded-xl bg-sky-500 hover:bg-sky-400 text-slate-950 font-bold text-sm inline-flex items-center gap-2 transition shadow-lg shadow-sky-500/25 active:scale-95"
+          >
+            <Plus className="w-4 h-4" />
+            <span>เพิ่ม Server ใหม่ของคุณ</span>
+          </button>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
         {servers.map((server) => {
           const status = statusResults[server.id];
           const isActive = currentConfig.host === server.host && currentConfig.port === server.port;
@@ -349,10 +367,11 @@ export const ServerStatusView: React.FC<ServerStatusViewProps> = ({
                   <span>{isActive ? 'กำลังใช้งานอยู่' : 'ใช้งาน Server นี้'}</span>
                 </button>
               </div>
-            </div>
-          );
-        })}
-      </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
 
       {/* Add Custom Server Modal */}
       {isAddModalOpen && (

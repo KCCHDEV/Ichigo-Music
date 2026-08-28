@@ -1,18 +1,20 @@
 import React from 'react';
-import { Home, Search, History, Settings, Music, Radio, Server, Terminal, Sparkles, User } from 'lucide-react';
+import { Home, Search, History, Settings, Music, Radio, Server, Terminal, Sparkles, User, FolderOpen } from 'lucide-react';
 
 interface SidebarProps {
   activeTab: 'home' | 'search' | 'history' | 'servers' | 'logs' | 'about';
   setActiveTab: (tab: 'home' | 'search' | 'history' | 'servers' | 'logs' | 'about') => void;
   openSettings: () => void;
   isConnected: boolean;
+  onOpenLocalFiles?: () => void;
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({
   activeTab,
   setActiveTab,
   openSettings,
-  isConnected
+  isConnected,
+  onOpenLocalFiles,
 }) => {
   return (
     <aside className="w-64 bg-slate-900/90 backdrop-blur-md border-r border-slate-800/80 flex flex-col justify-between p-4 h-screen select-none">
@@ -75,6 +77,16 @@ export const Sidebar: React.FC<SidebarProps> = ({
             <History className="w-4 h-4" />
             <span>ประวัติการฟัง (History)</span>
           </button>
+
+          {onOpenLocalFiles && (
+            <button
+              onClick={onOpenLocalFiles}
+              className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-sky-400 hover:text-sky-300 hover:bg-sky-500/10 border border-sky-500/20 transition-all"
+            >
+              <FolderOpen className="w-4 h-4 text-sky-400" />
+              <span>เปิดไฟล์ MP3 (Local Files)</span>
+            </button>
+          )}
 
           <button
             onClick={() => setActiveTab('servers')}

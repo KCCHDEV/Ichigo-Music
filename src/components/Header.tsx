@@ -1,14 +1,15 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Search, X, Clock, TrendingUp, Sparkles, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Search, X, Clock, TrendingUp, Sparkles, ChevronLeft, ChevronRight, FolderOpen } from 'lucide-react';
 import { getSearchSuggestions } from '../services/searchSuggestions';
 import { getSearchHistory, addToSearchHistory } from '../services/history';
 
 interface HeaderProps {
   onSearchSubmit: (query: string) => void;
   isConnected?: boolean;
+  onOpenLocalFiles?: () => void;
 }
 
-export const Header: React.FC<HeaderProps> = ({ onSearchSubmit }) => {
+export const Header: React.FC<HeaderProps> = ({ onSearchSubmit, onOpenLocalFiles }) => {
   const [query, setQuery] = useState('');
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [searchHistory, setSearchHistory] = useState<string[]>([]);
@@ -99,6 +100,16 @@ export const Header: React.FC<HeaderProps> = ({ onSearchSubmit }) => {
         >
           <ChevronRight className="w-4 h-4" />
         </button>
+        {onOpenLocalFiles && (
+          <button
+            onClick={onOpenLocalFiles}
+            className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-sky-500/10 border border-sky-500/30 text-sky-300 hover:bg-sky-500/20 text-xs font-semibold transition active:scale-95 ml-2"
+            title="เปิดไฟล์ MP3 จากในเครื่อง"
+          >
+            <FolderOpen className="w-3.5 h-3.5" />
+            <span>เปิดไฟล์ MP3</span>
+          </button>
+        )}
       </div>
 
       {/* Auto-search bar with YouTube/Apple Music style suggestions */}

@@ -1,17 +1,19 @@
 import React from 'react';
 import { Track } from '../types/music';
-import { Play, Sparkles, Flame, Clock, Radio } from 'lucide-react';
+import { Play, Sparkles, Flame, Clock, Radio, FolderOpen } from 'lucide-react';
 
 interface HomeViewProps {
   onPlayTrack: (track: Track) => void;
   onSearchQuery: (query: string) => void;
   recentlyPlayed: Track[];
+  onOpenLocalFiles?: () => void;
 }
 
 export const HomeView: React.FC<HomeViewProps> = ({
   onPlayTrack,
   onSearchQuery,
   recentlyPlayed,
+  onOpenLocalFiles,
 }) => {
   const quickGenres = [
     { title: 'เพลงไทยฮิตติดชาร์ต', query: 'เพลงไทยฮิตติดชาร์ต 2026', color: 'from-blue-600 to-sky-900' },
@@ -43,7 +45,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
           <p className="text-slate-300 text-sm leading-relaxed">
             ค้นหาเพลงด้วยระบบ ค้นหาอัตโนมัติ (Auto-Search) พร้อมระบบเตรียมคิวเพลงต่อเนื่องอัตโนมัติ
           </p>
-          <div className="flex items-center gap-3 pt-2">
+          <div className="flex flex-wrap items-center gap-3 pt-2">
             <button
               onClick={() => onSearchQuery('เพลงใหม่มาแรง')}
               className="px-5 py-2.5 rounded-xl bg-sky-500 hover:bg-sky-400 text-slate-950 font-bold text-sm flex items-center gap-2 shadow-lg shadow-sky-500/30 transition transform active:scale-95 duration-200"
@@ -51,6 +53,16 @@ export const HomeView: React.FC<HomeViewProps> = ({
               <Flame className="w-4 h-4 fill-current" />
               <span>สำรวจเพลงมาแรง</span>
             </button>
+
+            {onOpenLocalFiles && (
+              <button
+                onClick={onOpenLocalFiles}
+                className="px-5 py-2.5 rounded-xl bg-slate-900/90 border border-sky-500/40 hover:bg-sky-500/20 text-sky-300 font-bold text-sm flex items-center gap-2 shadow-lg transition transform active:scale-95 duration-200"
+              >
+                <FolderOpen className="w-4 h-4 text-sky-400" />
+                <span>เปิดเล่นไฟล์ MP3 ในเครื่อง</span>
+              </button>
+            )}
           </div>
         </div>
       </div>

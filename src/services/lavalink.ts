@@ -3,10 +3,10 @@ import { customFetch } from './http';
 import { logger } from './logger';
 
 const DEFAULT_CONFIG: LavalinkConfig = {
-  host: 'lava-v4.millohost.my.id',
-  port: 443,
-  password: 'https://discord.gg/mjS5J2K3ep',
-  secure: true,
+  host: '',
+  port: 2333,
+  password: '',
+  secure: false,
 };
 
 const CONFIG_KEY = 'music_app_lavalink_config';
@@ -55,6 +55,9 @@ export class LavalinkService {
   }
 
   public async testConnection(): Promise<{ success: boolean; message: string; version?: string }> {
+    if (!this.config.host) {
+      return { success: false, message: 'ยังไม่ได้ระบุ Host ของ Lavalink Server (กรุณาเพิ่มเซิร์ฟเวอร์ในตั้งค่า)' };
+    }
     const protocol = this.config.secure ? 'https' : 'http';
     const baseUrl = `${protocol}://${this.config.host}:${this.config.port}`;
     logger.addLog('info', 'Lavalink', `Testing connection to ${baseUrl}...`);
@@ -79,6 +82,10 @@ export class LavalinkService {
   }
 
   public async search(query: string, source: 'ytsearch' | 'ytmsearch' | 'scsearch' = 'ytsearch'): Promise<Track[]> {
+    if (!this.config.host) {
+      logger.addLog('warn', 'Lavalink', 'Cannot search: Lavalink server host is not configured');
+      return [];
+    }
     const protocol = this.config.secure ? 'https' : 'http';
     const baseUrl = `${protocol}://${this.config.host}:${this.config.port}`;
 

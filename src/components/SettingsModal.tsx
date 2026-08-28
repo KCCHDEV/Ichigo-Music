@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { X, Server, CheckCircle2, AlertCircle, RefreshCw, Key, Globe, Hash, Zap } from 'lucide-react';
-import { LavalinkConfig } from '../types/music';
-import { PUBLIC_LAVALINK_SERVERS } from '../services/lavalinkPresets';
+import { LavalinkConfig, LavalinkServerPreset } from '../types/music';
+import { getStoredLavalinkServers } from '../services/lavalinkPresets';
 
 interface SettingsModalProps {
   config: LavalinkConfig;
@@ -38,7 +38,9 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
     onClose();
   };
 
-  const applyPreset = (preset: typeof PUBLIC_LAVALINK_SERVERS[0]) => {
+  const presets = getStoredLavalinkServers();
+
+  const applyPreset = (preset: LavalinkServerPreset) => {
     setHost(preset.host);
     setPort(preset.port);
     setPassword(preset.password);
@@ -68,29 +70,31 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
         </div>
 
         {/* Quick Presets */}
-        <div className="space-y-2">
-          <label className="block text-xs font-semibold text-zinc-400 uppercase tracking-wider flex items-center gap-1.5">
-            <Zap className="w-3.5 h-3.5 text-rose-400" />
-            <span>Public Free Presets (เลือกใช้ฟรี)</span>
-          </label>
-          <div className="grid grid-cols-2 gap-2">
-            {PUBLIC_LAVALINK_SERVERS.map((preset) => (
-              <button
-                key={preset.id}
-                type="button"
-                onClick={() => applyPreset(preset)}
-                className={`p-2 rounded-xl text-left border transition text-xs flex flex-col ${
-                  host === preset.host
-                    ? 'bg-rose-950/30 border-rose-500/50 text-rose-200'
-                    : 'bg-zinc-950 border-zinc-800/80 text-zinc-300 hover:bg-zinc-800/50'
-                }`}
-              >
-                <span className="font-bold truncate">{preset.name}</span>
-                <span className="text-[10px] text-zinc-500">{preset.location}</span>
-              </button>
-            ))}
+        {presets.length > 0 && (
+          <div className="space-y-2">
+            <label className="block text-xs font-semibold text-zinc-400 uppercase tracking-wider flex items-center gap-1.5">
+              <Zap className="w-3.5 h-3.5 text-rose-400" />
+              <span>เซิร์ฟเวอร์ที่คุณบันทึกไว้ (Saved Server Presets)</span>
+            </label>
+            <div className="grid grid-cols-2 gap-2">
+              {presets.map((preset) => (
+                <button
+                  key={preset.id}
+                  type="button"
+                  onClick={() => applyPreset(preset)}
+                  className={`p-2 rounded-xl text-left border transition text-xs flex flex-col ${
+                    host === preset.host
+                      ? 'bg-rose-950/30 border-rose-500/50 text-rose-200'
+                      : 'bg-zinc-950 border-zinc-800/80 text-zinc-300 hover:bg-zinc-800/50'
+                  }`}
+                >
+                  <span className="font-bold truncate">{preset.name}</span>
+                  <span className="text-[10px] text-zinc-500">{preset.location}</span>
+                </button>
+              ))}
+            </div>
           </div>
-        </div>
+        )}
 
         {/* Form Controls */}
         <div className="space-y-3 pt-1 border-t border-zinc-800/60">
