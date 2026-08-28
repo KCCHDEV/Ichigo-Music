@@ -23,7 +23,15 @@ export const HomeView: React.FC<HomeViewProps> = ({
   return (
     <div className="p-6 space-y-8 pb-32">
       {/* Hero Banner */}
-      <div className="relative rounded-3xl overflow-hidden bg-gradient-to-r from-sky-950/80 via-blue-950/60 to-slate-900 p-8 border border-slate-800 shadow-2xl">
+      <div className="relative min-h-[300px] rounded-3xl overflow-hidden bg-slate-950 p-8 border border-sky-900/50 shadow-2xl flex items-center">
+        <img
+          src="/ichigo-music-hero.png"
+          alt=""
+          aria-hidden="true"
+          className="absolute inset-0 h-full w-full object-cover object-center"
+        />
+        <div className="absolute inset-0 bg-gradient-to-r from-slate-950 via-slate-950/90 to-slate-950/5" />
+        <div className="absolute inset-0 bg-gradient-to-t from-slate-950/65 via-transparent to-sky-950/15" />
         <div className="relative z-10 max-w-xl space-y-4">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-500/20 border border-sky-500/30 text-sky-300 text-xs font-semibold">
             <Sparkles className="w-3.5 h-3.5 text-white" />

@@ -1,3 +1,5 @@
+![Ichigo Music — Code 015 Edition](public/social/github-social-preview.png)
+
 <div align="center">
 
   <img src="public/app-logo.png" alt="Ichigo Music Logo" width="120" height="120" style="border-radius: 24px;" />
